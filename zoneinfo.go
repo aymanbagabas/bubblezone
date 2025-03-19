@@ -4,7 +4,7 @@
 
 package zone
 
-import tea "github.com/charmbracelet/bubbletea"
+import tea "github.com/charmbracelet/bubbletea/v2"
 
 // ZoneInfo holds information about the start and end positions of a zone.
 type ZoneInfo struct { // nolint:revive
@@ -40,11 +40,12 @@ func (z *ZoneInfo) InBounds(e tea.MouseMsg) bool {
 		return false
 	}
 
-	if e.X < z.StartX || e.Y < z.StartY {
+	m := e.Mouse()
+	if m.X < z.StartX || m.Y < z.StartY {
 		return false
 	}
 
-	if e.X > z.EndX || e.Y > z.EndY {
+	if m.X > z.EndX || m.Y > z.EndY {
 		return false
 	}
 
@@ -59,5 +60,6 @@ func (z *ZoneInfo) Pos(msg tea.MouseMsg) (x, y int) {
 		return -1, -1
 	}
 
-	return msg.X - z.StartX, msg.Y - z.StartY
+	m := msg.Mouse()
+	return m.X - z.StartX, m.Y - z.StartY
 }

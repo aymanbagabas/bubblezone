@@ -7,8 +7,8 @@ package main
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss/v2"
 	zone "github.com/lrstanley/bubblezone"
 )
 
@@ -37,7 +37,7 @@ var (
 
 	tab = lipgloss.NewStyle().
 		Border(tabBorder, true).
-		BorderForeground(highlight).
+		BorderForeground(highlightDark).
 		Padding(0, 1)
 
 	activeTab = tab.Border(activeTabBorder, true)
@@ -65,22 +65,25 @@ func (m tabs) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
-	case tea.MouseMsg:
-		if msg.Action != tea.MouseActionRelease || msg.Button != tea.MouseButtonLeft {
+	case tea.MouseClickMsg:
+		if msg.Button != tea.MouseLeft {
 			return m, nil
 		}
 
-		for _, item := range m.items {
-			// Check each item to see if it's in bounds.
-			if zone.Get(m.id + item).InBounds(msg) {
-				m.active = item
-				break
-			}
-		}
-
-		return m, nil
+		m.handleMouse(msg)
+	case tea.MouseWheelMsg:
+		m.handleMouse(msg)
 	}
 	return m, nil
+}
+
+func (m *tabs) handleMouse(msg tea.MouseMsg) {
+	for _, item := range m.items {
+		if zone.Get(m.id + item).InBounds(msg) {
+			m.active = item
+			break
+		}
+	}
 }
 
 func (m tabs) View() string {

@@ -7,7 +7,7 @@ package zone
 import (
 	"unicode/utf8"
 
-	"github.com/muesli/ansi"
+	"github.com/charmbracelet/x/ansi"
 )
 
 const (
@@ -66,7 +66,7 @@ func (s *scanner) emit() {
 	if item, ok := s.tracked[rid]; ok {
 		// The end should be - 1, because it's the end of the encapsulation of the
 		// zone, and isn't actually taking up another space.
-		item.EndX = ansi.PrintableRuneWidth(s.input[s.lastNewline:s.start]) - 1
+		item.EndX = ansi.StringWidthWc(s.input[s.lastNewline:s.start]) - 1
 		item.EndY = s.newlines
 
 		s.manager.setChan <- item
@@ -76,7 +76,7 @@ func (s *scanner) emit() {
 		s.tracked[rid] = &ZoneInfo{
 			id:        rid,
 			iteration: s.iteration,
-			StartX:    ansi.PrintableRuneWidth(s.input[s.lastNewline:s.start]),
+			StartX:    ansi.StringWidthWc(s.input[s.lastNewline:s.start]),
 			StartY:    s.newlines,
 		}
 	}

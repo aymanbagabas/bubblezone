@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea/v2"
 )
 
 type testModel struct {
@@ -48,7 +48,7 @@ func TestAnyInBounds(t *testing.T) {
 		t.Error("id not found")
 	}
 
-	_, _ = m.Update(tea.MouseMsg{X: 4, Y: 2})
+	_, _ = m.Update(tea.MouseClickMsg{X: 4, Y: 2})
 	time.Sleep(100 * time.Millisecond)
 
 	var contains bool
@@ -91,14 +91,14 @@ func (m testModelValue) View() string {
 
 func TestAnyInBoundsAndUpdate(t *testing.T) {
 	var m tea.Model = testModelValue{}
-	_ = Scan(m.View())
+	_ = Scan(m.(tea.ViewModel).View())
 	time.Sleep(100 * time.Millisecond)
 	xy := Get("foo")
 	if xy.IsZero() {
 		t.Error("id not found")
 	}
 
-	m, _ = m.Update(tea.MouseMsg{X: 4, Y: 2})
+	m, _ = m.Update(tea.MouseClickMsg{X: 4, Y: 2})
 	time.Sleep(100 * time.Millisecond)
 
 	var contains bool

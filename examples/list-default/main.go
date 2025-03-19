@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/bubbles/v2/list"
+	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss/v2"
 	zone "github.com/lrstanley/bubblezone"
 )
 
@@ -47,18 +47,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
-	case tea.MouseMsg:
-		if msg.Button == tea.MouseButtonWheelUp {
+	case tea.MouseWheelMsg:
+		if msg.Button == tea.MouseWheelUp {
 			m.list.CursorUp()
 			return m, nil
 		}
 
-		if msg.Button == tea.MouseButtonWheelDown {
+		if msg.Button == tea.MouseWheelDown {
 			m.list.CursorDown()
 			return m, nil
 		}
 
-		if msg.Action == tea.MouseActionRelease && msg.Button == tea.MouseButtonLeft {
+	case tea.MouseReleaseMsg:
+		if msg.Button == tea.MouseLeft {
 			for i, listItem := range m.list.VisibleItems() {
 				v, _ := listItem.(item)
 				// Check each item to see if it's in bounds.

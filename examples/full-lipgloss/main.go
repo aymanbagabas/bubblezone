@@ -6,10 +6,11 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss/v2"
 	zone "github.com/lrstanley/bubblezone"
 )
 
@@ -18,14 +19,21 @@ import (
 // 	https://github.com/charmbracelet/lipgloss/blob/master/example
 
 var (
-	subtle    = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
-	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	special   = lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"}
+	subtleLight    = lipgloss.Color("#D9DCCF")
+	subtleDark     = lipgloss.Color("#383838")
+	highlightLight = lipgloss.Color("#874BFD")
+	highlightDark  = lipgloss.Color("#7D56F4")
+	specialLight   = lipgloss.Color("#43BF6D")
+	specialDark    = lipgloss.Color("#73F59F")
 )
 
 type model struct {
 	height int
 	width  int
+
+	subtle    color.Color
+	highlight color.Color
+	special   color.Color
 
 	tabs    tea.Model
 	dialog  tea.Model
@@ -35,7 +43,7 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.RequestBackgroundColor
 }
 
 func (m model) isInitialized() bool {
@@ -50,7 +58,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.BackgroundColorMsg:
+		if msg.IsDark() {
+			m.subtle = subtleDark
+			m.highlight = highlightDark
+			m.special = specialDark
+		} else {
+			m.subtle = subtleLight
+			m.highlight = highlightLight
+			m.special = specialLight
+		}
+		hist := m.history.(history)
+		hist.subtle = m.subtle
+		hist.highlight = m.highlight
+		m.history = hist
+	case tea.KeyPressMsg:
 		// Example of toggling mouse event tracking on/off.
 		if msg.String() == "ctrl+e" {
 			zone.SetEnabled(!zone.Enabled())
@@ -96,16 +118,16 @@ func (m model) View() string {
 	s := lipgloss.NewStyle().MaxHeight(m.height).MaxWidth(m.width).Padding(1, 2, 1, 2)
 
 	return zone.Scan(s.Render(lipgloss.JoinVertical(lipgloss.Top,
-		m.tabs.View(), "",
+		m.tabs.(tea.ViewModel).View(), "",
 		lipgloss.PlaceHorizontal(
 			m.width, lipgloss.Center,
 			lipgloss.JoinHorizontal(
 				lipgloss.Top,
-				m.list1.View(), m.list2.View(), m.dialog.View(),
+				m.list1.(tea.ViewModel).View(), m.list2.(tea.ViewModel).View(), m.dialog.(tea.ViewModel).View(),
 			),
 			lipgloss.WithWhitespaceChars(" "),
 		),
-		m.history.View(),
+		m.history.(tea.ViewModel).View(),
 	)))
 }
 
